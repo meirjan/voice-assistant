@@ -1,0 +1,8 @@
+import speech_recognition as sr #pip install SpeechRecognition
+import pyttsx3 as pt #pip install pyttsx3
+import datetime
+import time
+import pyowm #pip install pyowm
+from pyowm.utils import config as cfg
+import webbrowser as wb
+import cv2 #pip install openCV
