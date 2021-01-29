@@ -1,0 +1,135 @@
+import speech_recognition as sr
+import pyttsx3 as pt
+import datetime
+import time
+import pyowm
+from pyowm.utils import config as cfg
+import webbrowser as wb
+import cv2
+
+def search(rec):
+    #words massive
+    mass = {
+    "search" :("найди", "открой")
+    }
+    for i in mass["search"]:
+        rec = rec.replace(i, "")
+        rec = rec.replace(" ", "+")
+        speaker.say("ищу...")
+        print("ищу...")
+        speaker.runAndWait()
+        wb.open_new("https://www.google.com/search?q=" + rec + "&oq=hello+my+name+is+alan&aqs=chrome..69i57j0i22i30l2j0i10i22i30l2.10908j1j7&sourceid=chrome&ie=UTF-8")
+
+def time():
+    now = datetime.datetime.now()
+    print("Сейчас " + str(now.hour) + ":" + str(now.minute))
+    speaker.say("Сейчас " + str(now.hour) + ":" + str(now.minute))
+    speaker.runAndWait()
+
+def weather():
+    #calibrating module
+    config = cfg.get_default_config()
+    config['language'] = 'ru'
+    owm = pyowm.OWM("a5dc7779a3127c765bee93d09d34a658")
+    mgr = owm.weather_manager()
+    observation = mgr.weather_at_place("Aktobe, KZ")
+    w = observation.weather
+    #weather
+    temp = w.temperature("celsius")
+    print("Сегодня : " + str(temp["temp"]) + "С°")
+    tempi = int(temp["temp"])
+    temps = str(tempi).replace("-", "минус")
+    speaker.say("Сегодня : " + str(temps) + "градусов Цельсия")
+    print(w.detailed_status)
+    speaker.say(w.detailed_status)
+    #clouds thing
+    c = w.clouds
+    if c >= 0 and c <= 24:
+        print("Малая облачность")
+        speaker.say("Малая облачность")
+    elif c >= 25 and c <= 49:
+        print("Низкая облочость")
+        speaker.say("Низкая облачность")
+    elif c >= 50 and c <= 74:
+        print("Средняя облочность")
+        speaker.say("Средняя облачность")
+    else:
+        print("Высокая облачность")
+        speaker.say("Высокая облачность")
+    #wind thing
+    b = w.wind()
+    if b["deg"] >= 326 and b["deg"] <= 33:
+        print("Ветер северный")
+        speaker.say("Ветер северный")
+    elif b["deg"] >= 34 and b["deg"] <= 78:
+        print("Ветер северо-восточный")
+        speaker.say("Ветер северо-восточный")
+    elif b["deg"] >= 79 and b["deg"] <= 123:
+        print("Ветер восточный")
+        speaker.say("Ветер восточный")
+    elif b["deg"] >= 124 and b["deg"] <= 168:
+        print("Ветер юго-восточный")
+        speaker.say("Ветер юго-восточный")
+    elif b["deg"] >= 169 and b["deg"] <= 213:
+        print("Ветер южный")
+        speaker.say("Ветер южный")
+    elif b["deg"] >= 214 and b["deg"] <= 258:
+        print("Ветер юго-западный")
+        speaker.say("Ветер юго-западный")
+    elif b["deg"] >= 259 and b["deg"] <= 303:
+        print("Ветер западный")
+        speaker.say("Ветер западный")
+    elif b["deg"] >= 304 and b["deg"] <= 325:
+        print("Ветер севоро-заподный")
+        speaker.say("Ветер севоро-заподный")
+    #humidity thing
+    print(str(w.humidity) + "% влажности")
+    speaker.say("Сегодня " + str(w.humidity) + "% влажности")
+    speaker.runAndWait()
+
+def webcam():
+    speaker.say("выключите камеру нажав кнопку 'q'")
+    speaker.runAndWait()
+    #capturing webcam
+    cap = cv2.VideoCapture(0)
+    while True:
+        succ, img = cap.read()
+        cv2.imshow("window", img)
+        if cv2.waitKey(1) & 0xff == ord("q"):#turning off webcam
+            break
+#calibrating bot
+speaker = pt.init()
+r = sr.Recognizer()
+
+#welcome
+speaker.say("Здраствуйте я ваш голосовой ассистент Луна, что вам нужно")
+speaker.runAndWait()
+
+#listening
+with sr.Microphone(device_index = 1) as source:
+    audio = r.listen(source)
+#voice recognize
+rec = r.recognize_google(audio, language = "ru-RU")
+rec = rec.lower()
+
+recl = rec.split()
+
+
+#finding words
+for i in recl:
+    if i == "найди" or i == "открой":
+        search(rec)
+    elif i == "время":
+        time()
+        break
+    elif i == "погода":
+        weather()
+        break
+    
+    elif i == "включи" or i == "запусти":
+        for i in recl:
+            if i == "камеру":
+                webcam()
+    elif i == "анекдот":
+        speaker.say("мой автор не научил меня анекдотам... ха ха")
+        speaker.runAndWait()
